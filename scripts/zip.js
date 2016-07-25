@@ -15,6 +15,21 @@
     return list;
   }
 
+  function getTopFive(data) {
+    top5 = removeDuplicates(data.map(function(obj) {
+      return {
+        neighborhood: obj.neighborhood,
+        count: modifiedData.filter(function(o) {
+          return o.neighborhood === obj.neighborhood;
+        }).length
+      };
+    })).sort(function(a,b) {
+      return b.count - a.count;
+    });
+
+    top5 = [top5[0], top5[1], top5[2], top5[3], top5[4]];
+  }
+
   function transformData(data) {
     modifiedData = data.features.map(function(obj) {
       return {
@@ -31,22 +46,7 @@
       }
     });
 
-    top5 = modifiedData.map(function(obj) {
-      return {
-        neighborhood: obj.neighborhood,
-        count: modifiedData.filter(function(o) {
-          return o.neighborhood === obj.neighborhood;
-        }).length
-      };
-    });
-
-    top5 = removeDuplicates(top5);
-
-    top5.sort(function(a,b) {
-      return b.count - a.count;
-    });
-
-    top5 = [top5[0], top5[1], top5[2], top5[3], top5[4]];
+    getTopFive(modifiedData);
     console.log('top5: ', top5);
   }
 
