@@ -1,12 +1,63 @@
 (function(module) {
   var zip = {};
-  
-  getData = function() {
+  var modifiedData = [];
+  var top5 = [];
+
+  function transformData(data) {
+    modifiedData = data.features;
+    modifiedData = modifiedData.map(function(obj) {
+      return {
+        address : obj.properties.address,
+        neighborhood: obj.properties.neighborhood,
+        zip: obj.properties.zip,
+        coordinates: {lng: obj.geometry.coordinates[0], lat: obj.geometry.coordinates[1]}
+      };
+    });
+
+    modifiedData.forEach(function(loc) {
+      if (loc.address === '') {
+        loc.address = null;
+      }
+    });
+
+    top5 = modifiedData.map(function(obj) {
+      return {
+        neighborhood: obj.neighborhood,
+        count: modifiedData.filter(function(o) {
+          return o.neighborhood === obj.neighborhood;
+        }).length
+      };
+    });
+    //remove duplicates
+    for (var l = 0; l < top5.length; l++) {
+      for (var m = 0; m < top5.length; m++) {
+        if (top5[l].neighborhood === top5[m].neighborhood && l != m) {
+          top5.splice(m, 1);
+          m--;
+        }
+      }
+    }
+
+    top5.sort(function(a,b) {
+      return b.count - a.count;
+    });
+    top5 = [top5[0], top5[1], top5[2], top5[3], top5[4]];
+    console.log('top5: ', top5);
+  }
+
+  function loadData(data) {
+    zip = data;
+    transformData(zip);
+
+    zip.modifiedData = modifiedData;
+    zip.top5 = top5;
+    module.zip = zip;
+  }
+
+  getData = function(nextFunction) {
     $.getJSON('/data/manhattan.json', function(data) {
-      // TODO: start here!
+      nextFunction(data);
     });
   };
-
-  getData();
-  module.zip = zip;
+  getData(loadData);
 })(window);
